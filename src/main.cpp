@@ -1,10 +1,16 @@
 #include <Arduino.h>
+
 #include <Wire.h>
 #include "SPI.h"
 #include "RTClib.h"
 
+#include <FS.h>
+#include <LittleFS.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+//#include <ESP8266WebServer.h>
+
 
 // RTC_DS1307 rtc;
 RTC_DS3231 rtc;
@@ -13,11 +19,17 @@ String daysOfTheWeek[7] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves", 
 String monthsNames[12] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
 const int rele = D0;
+String releState;
 bool state = false;
 
 const char *ssid_AP = "ESP8266_AP";
 const char *password_AP = "12345678";
-ESP8266WebServer server(80);
+
+// const char* ssid = "Zurimuri"; //Replace with your own SSID
+// const char* password = "sogtulakk"; //Replace with your own password
+
+AsyncWebServer server(80);
+//ESP8266WebServer server(80);
 
 // Comprueba si esta programado el encendido
 bool isScheduledON(DateTime date)
@@ -48,6 +60,22 @@ void printDate(DateTime date)
   Serial.println();
 }
 
+// Replaces placeholder with LED state value
+String processor(const String& var){
+  Serial.println(var);
+  if(var == "STATE"){
+    if(digitalRead(rele)){
+      releState = "ON";
+    }
+    else{
+      releState = "OFF";
+    }
+    Serial.print(releState);
+    return releState;
+  } else return releState;
+  //return String();
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -56,22 +84,43 @@ void setup()
   if (!rtc.begin())
   {
     Serial.println(F("Couldn't find RTC"));
-    while (1)
-      ;
+    while (1);
   }
 
+  // Initialize SPIFFS
+  LittleFS.begin();
+
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid_AP, password_AP);
-  Serial.println("WiFi conectada.");
-  Serial.println();
-  WiFi.printDiag(Serial);
-  Serial.println();
+  //WiFi.softAP(ssid_AP, password_AP);
+  WiFi.softAP(ssid_AP);
   Serial.print("AP dirección IP: ");
   Serial.println(WiFi.softAPIP());
-  server.on("/", []()
-            { server.send(200, "text/plain", "Hola mundo!!"); });
+
+  // WiFi.begin(ssid, password);
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(1000);
+  //   Serial.println("Connecting to WiFi..");
+  // }
+  // Serial.println(WiFi.localIP());
+
+
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/index.html",String(), false, processor);
+  });
+
+
+    // Route to load style.css file
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(LittleFS, "/style.css", "text/css");
+  });
+  
   server.begin();
+
   Serial.println("Servidor inicializado.");
+
+
+
 
   // Si se ha perdido la corriente, fijar fecha y hora
   if (rtc.lostPower())
@@ -82,13 +131,14 @@ void setup()
     // Fijar a fecha y hora específica. En el ejemplo, 21 de Enero de 2016 a las 03:00:00
     // rtc.adjust(DateTime(2016, 1, 21, 3, 0, 0));
   }
+
 }
 
 void loop()
 {
 
   DateTime now = rtc.now(); // Obtener fecha y hora actual
-  server.handleClient();
+  //server.handleClient();
 
   if (!state && isScheduledON(now))
   {

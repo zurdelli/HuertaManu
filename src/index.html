@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Ksushini & Zurdelli</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no,
+	 initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	 <link href="https://fonts.googleapis.com/css?family=ABeeZee&display=swap" rel="stylesheet">
+	 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+	 <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body class="budy">
+		<div class='container'>
+			<header class='row'>
+				<div class='encabezado col-xs-12'>
+					<h1 class="text-center">K&Z</h1>
+					<p class="text-right">18:35</p>
+				</div>
+			</header>
+
+			<!-- Fila del interruptor general -->
+			<div class="row">
+					<div class="col-xs-8">
+						<form action='/LED' method='POST' >
+							<button class="btn btn-danger btn-block center" type="submit" >
+							  <i class="glyphicon glyphicon-off" style="font-size:120px;color:#FFFFFF"></i>
+							</button>
+						</form>
+					</div>
+					<div class="rele col-xs-4 center">
+						<div class="row">
+							<h3 class="text-center" style="padding-bottom: 40px;">RELAY</h3>
+						</div>
+						<div class="row text-center">
+							<div class="btn-group">
+							 <a href="https://192.168.0.223/RELAY=ON" class="btn btn-success">ON</a>
+							 <a href="https://192.168.0.223/RELAY=OFF" class="btn btn-danger">OFF</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<hr>
+
+		<!-- Fila del slider general -->
+		<div class="row">
+			<div class="col-xs-12">
+					<div class="text-center center">
+						<input type="range" min="0" max="1023" value="512" class="slider" id="myRange">
+					</div>
+			</div>
+		</div>
+
+		<!-- Fila de los encendidos  -->
+		<form action='/DISPLAY' method='POST' class="form center">
+			<div class="center">
+				<div class="btn-group btn-group-justified">
+					<div class="btn-group">
+						<input type='submit' name="izquierda" class="btn btn-primary btn-lg" value='Izquierda' >
+					</div>
+					<div class="btn-group">
+						<input type='submit' name="ambas" class="btn btn-info btn-lg" value='Ambas' >
+					</div>
+					<div class="btn-group">
+						<input type='submit' name="derecha"class="btn btn-default btn-lg"value='Derecha' >
+					</div>
+				</div>
+			</div>
+	  </form>
+
+			<hr>
+
+
+			<div class="row">
+				<div class="btn-group btn-group-justified btn-group-lg">
+					<a href="#" class="btn btn-success" data-toggle="modal" data-target="#encendido">Auto ON</a>
+					<a href="#" class="btn btn-danger" data-toggle="modal" data-target="#apagado">Auto OFF</a>
+				</div>
+			</div>
+
+			<!-- Modal -->
+			<div class="modal fade" id="encendido" role="dialog">
+				<div class="modal-dialog">
+
+					<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Programar Encendido</h4>
+						</div>
+						<form action='/PWMEnc' method='POST'>
+							<div class="modal-body divInic">
+							 <div class="form-group row">
+								 <div class="col-xs-6">
+								 	 <input type="number" class="form-control" placeholder="Hora" name="horaEnc" min="0" max="23" id="horaEn">
+								 </div>
+								 <div class="col-xs-6">
+								 	 <input type="number" class="form-control" placeholder="Minuto" name="minutoEnc" min="0" max="59" id="minutoEn">
+								 </div>
+							 </div>
+							 <div class="text-center center">
+								 <input type="range" min="0" max="1023" value="512" class="slider" id="rangeENC" name="rangeEncendido">
+							 </div>
+							 <div class="text-left">
+								 <p>Actual hora de encendido:</p>
+								 <p class="textoHora"></p>
+							 </div>
+							 <div class="text-center">
+							 	<input type="submit" class="btn btn-success" onclick="encendido()" value="Ok">
+							 </div>
+						 </div>
+					 </form>
+
+							<div class="modal-body divSegu">
+								<div class="text-center center">
+									<p class="text-center">Perfecto!</p>
+								</div>
+							</div>
+
+							<div class="modal-footer" id="modal-footer">
+								<form action="/CancelEnc" method="post">
+									<input type="submit" class="btn btn-link btn-block" value="Eliminar encendido automatico">
+								</form>
+							</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="apagado" role="dialog">
+				<div class="modal-dialog">
+
+					<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Programar Apagado</h4>
+						</div>
+						<form action='/PWMApa' method='POST'>
+							<div class="modal-body divInic">
+							 <div class="form-group row">
+								 <div class="col-xs-6">
+									 <input type="number" class="form-control" placeholder="Hora" name="horaApa" min="0" max="23" id="horaAp">
+								 </div>
+								 <div class="col-xs-6">
+									 <input type="number" class="form-control" placeholder="Minuto" name="minutoAp" min="0" max="59" id="minutoAp">
+								 </div>
+							 </div>
+							 <div class="text-left">
+								 <p>Actual hora de apagado:</p>
+								 <p class="textoHora"></p>
+							 </div>
+							 <div class="text-center">
+								<input type="submit" class="btn btn-success" onclick="apagado()" value="Ok">
+							 </div>
+						 </div>
+						</form>
+
+							<div class="modal-body divSegu">
+								<div class="text-center center">
+									<p class="text-center">Perfecto!</p>
+								</div>
+							</div>
+
+							<div class="modal-footer" id="modal-footer">
+								<form action="/CancelApa" method="post">
+									<input type="submit" class="btn btn-link btn-block" value="Eliminar apagado automatico">
+								</form>
+							</div>
+
+
+					</div>
+
+				</div>
+			</div>
+
+
+		<script>
+			var slider = document.getElementById("myRange");
+			// var output = document.getElementById("demo");
+			// output.innerHTML = slider.value;
+
+			slider.oninput = function() {
+			  // output.innerHTML = this.value;
+				pwm_change(this.value);
+			}
+		</script>
+
+		<script>
+			function pwm_change(val) {
+			  var xhttp = new XMLHttpRequest();
+			  xhttp.open("GET", "setPWM?PWMval="+val, true);
+			  xhttp.send();
+			}
+		</script>
+
+		<script>
+			$(function(){
+				$('#apagado .divSegu').hide();
+				$('#encendido .divSegu').hide();
+			});
+
+			function encendido(){
+
+				if ( $('#horaEn').val() < 0 || $('#horaEn').val() > 23 || $('#minutoEn').val() < 0
+				 || $('#minutoEn').val() > 59 || $('#horaEn').val().length == 0 || $('#minutoEn').val().length == 0){
+					$('#encendido .textoHora').text( "Error");
+				} else {
+					$('#encendido .divInic').hide();
+					$('#encendido .divSegu').fadeIn();
+					$('#encendido #modal-footer').hide();
+
+					setTimeout(function(){
+						 $('#encendido').modal("hide");
+						 $('#encendido .divInic').fadeIn();
+						 $('#encendido .divSegu').hide();
+						 $('#encendido #modal-footer').fadeIn();
+					 }, 1500);
+
+				$('#encendido .textoHora').text( $('#horaEn').val() + ' : ' + $('#minutoEn').val());
+			}
+			}
+
+			function apagado(){
+
+				if ( $('#horaAp').val() < 0 || $('#horaAp').val() > 23 || $('#minutoAp').val() < 0
+				 || $('#minutoAp').val() > 59 || $('#horaAp').val().length == 0 || $('#minutoAp').val().length == 0){
+					$('#apagado .textoHora').text( "Error");
+				} else {
+					$('#apagado .divInic').hide();
+					$('#apagado .divSegu').fadeIn();
+					$('#apagado #modal-footer').hide();
+
+					setTimeout(function(){
+						 $('#apagado').modal("hide");
+						 $('#apagado .divInic').fadeIn();
+						 $('#apagado .divSegu').hide();
+						 $('#apagado #modal-footer').fadeIn();
+					 }, 1500);
+
+				$('#apagado .textoHora').text( $('#horaAp').val() + ' : ' + $('#minutoAp').val());
+			}
+			}
+		</script>
+
+</body>
+</html>
