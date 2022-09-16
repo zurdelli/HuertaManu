@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "SPI.h"
 #include "RTClib.h"
 
 // RTC_DS1307 rtc;
@@ -7,6 +8,38 @@ RTC_DS3231 rtc;
 
 String daysOfTheWeek[7] = { "Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado" };
 String monthsNames[12] = { "Enero", "Febrero", "Marzo", "Abril", "Mayo",  "Junio", "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre" };
+
+const int rele = D0;
+bool state = false;
+
+//Comprueba si esta programado el encendido
+bool isScheduledON(DateTime date)
+{
+   int weekDay = date.dayOfTheWeek(); //Domingo 0 / Lunes 1 / Martes 2 / Miercoles 3 / Jueves 4 / Viernes 5 / Sabado 6
+   float hours = date.hour() + date.minute() / 60.0;
+   bool hourCondition = (hours > 14.00 && hours < 14.05) || (hours > 21.00 && hours < 23.00);
+   bool dayCondition = (weekDay == 5 || weekDay == 6 || weekDay == 0); 
+
+   return (hourCondition && dayCondition) ? true : false ;
+}
+
+void printDate(DateTime date){
+   Serial.print(date.year(), DEC);
+   Serial.print('/');
+   Serial.print(date.month(), DEC);
+   Serial.print('/');
+   Serial.print(date.day(), DEC);
+   Serial.print(" (");
+   Serial.print(daysOfTheWeek[date.dayOfTheWeek()]);
+   Serial.print(") ");
+   Serial.print(date.hour(), DEC);
+   Serial.print(':');
+   Serial.print(date.minute(), DEC);
+   Serial.print(':');
+   Serial.print(date.second(), DEC);
+   Serial.println();
+}
+
 
 void setup() {
    Serial.begin(9600);
@@ -27,28 +60,23 @@ void setup() {
    }
 }
 
-void printDate(DateTime date)
-{
-   Serial.print(date.year(), DEC);
-   Serial.print('/');
-   Serial.print(date.month(), DEC);
-   Serial.print('/');
-   Serial.print(date.day(), DEC);
-   Serial.print(" (");
-   Serial.print(daysOfTheWeek[date.dayOfTheWeek()]);
-   Serial.print(") ");
-   Serial.print(date.hour(), DEC);
-   Serial.print(':');
-   Serial.print(date.minute(), DEC);
-   Serial.print(':');
-   Serial.print(date.second(), DEC);
-   Serial.println();
-}
 
 void loop() {
-   // Obtener fecha actual y mostrar por Serial
-   DateTime now = rtc.now();
-   printDate(now);
+
+   
+   DateTime now = rtc.now(); // Obtener fecha y hora actual
+   
+   if (!state && isScheduledON(now)){
+    digitalWrite(rele, HIGH);
+    state = true;
+    Serial.println("Activado");
+   } else if (state && !isScheduledON(now)){
+    digitalWrite(rele, LOW);
+    state = false;
+    Serial.print("Desactivado");
+   }
+
+   //printDate(now);
 
    delay(3000);
 }
