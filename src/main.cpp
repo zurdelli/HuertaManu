@@ -29,10 +29,11 @@ const char *password_AP = "12345678";
 
 AsyncWebServer server(80);
 
-
-String horarios[5]; // creo array de horarios
 float horariosFloat[5];
-int contador = 0;
+int diasArray[6];
+int contDias = 0, contHorarios = 0;
+float minutos = 0;
+
 
 
 /**
@@ -42,87 +43,157 @@ int contador = 0;
 bool enciendeBomba(DateTime date)
 {
   int weekDay = date.dayOfTheWeek(); // Domingo 0 / Lunes 1 / Martes 2 / Miercoles 3 / Jueves 4 / Viernes 5 / Sabado 6
-  float hours = date.hour() + date.minute() / 60.0;
-  Serial.println(hours);
-  bool dayCondition = (weekDay == 5 || weekDay == 6 || weekDay == 0);
-  bool hourCondition;
+  float hours = date.hour() + date.minute()/100.0;
 
-  for (int i = 0; i< contador;i++){
-    hourCondition += (hours >= horariosFloat[i] && hours <= horariosFloat[i] + .05);
+  bool hourCondition;
+  bool dayCondition;
+  float misMinutos = minutos / 100;
+
+
+  
+  for (int j=0; j < contDias; j++){
+    //Serial.print("Day condition: ");
+    dayCondition += (weekDay == diasArray[j]);
+    //if(dayCondition) Serial.println(dayCondition);
+  }
+
+  for (int i = 0; i < contHorarios;i++){
+    //Serial.println(hours);
+    //Serial.println(horariosFloat[i]);
+    //Serial.println(horariosFloat[i] + misMinutos);
+    hourCondition += (hours >= horariosFloat[i] && hours < 
+      (horariosFloat[i]+misMinutos));
+    if (hourCondition){
+      Serial.print("HourCondition: ");
+      Serial.println(hourCondition);
+    }
   }
   
-  bool condicionhoraria = (hours >= 14.09);
-
-  //return (condicionhoraria && dayCondition) ? true : false;
-  return (condicionhoraria) ? true : false;
+  return (hourCondition && dayCondition) ? true : false;
 }
 
-void compilePattern(){
 
-  MatchState ms;
-  ms.Target ("Testing: answer=42"); // String to be searched
-
-  /**
-   * Regexp: 
-   * 1. Hours 
-   * 2. Minutes to finish
-   * 3. Days at week
-   * */
-  String regExp = "14.00,21.00;5;1,4,5";
-
-  String matcher = ("[]");
-
-
-}
-
-// called for each match
 void setHorarios  (const char * match,          // matching string (not null-terminated)
                       const unsigned int length,   // length of matching string
                       const MatchState & ms)      // MatchState in use (to get captures)
 {
-
   String hora;
-  for (int i = 0; i< length ; i++){
-    hora += match[i];
+
+  // 7 por la palabra "horarios"
+  // -2 por que tuve que poner ";m" al final de la linea ya que sino me daba eror
+  // tuve que repetir el codigo fuera del for ya que sino no me capturaba el ultimo horario
+  for (int i = 7; i< length -2; i++){
+    if (match[i] != ','){
+      hora += match[i];
+    } else {
+      //Serial.println(hora);
+      horariosFloat[contHorarios] = hora.toFloat();
+      contHorarios++;
+      hora = "";
+    }
   }
 
-  horariosFloat[contador] = hora.toFloat();
-  contador++;
+  //Serial.println(hora);
+  horariosFloat[contHorarios] = hora.toFloat();
+  contHorarios++;
+  hora = "";
+}
 
-}  // end of match_callback 
+void setMinutos (const char * match, const unsigned int length, const MatchState & ms){
+  String minuto;
+  // Mismo funcionamiento que el anterior, 6 ya que "minuto" tiene 6 letras
+  for(int i = 6; i < length; i++){
+    minuto += match[i];
+  }
+  //Serial.print("Minutos: ");
+  minutos = minuto.toFloat();
+  //Serial.println(minutos);
+}
+
+void setDias (const char * match, const unsigned int length, const MatchState & ms){
+  String dias;
+
+  for(int i = 4; i < length; i++){
+    dias += match[i];
+    
+    // Se debe restar un '0' en char para que quede el numeero limpio
+    if(match[i] - '0' >= 0 && (int)match[i] - '0' <= 9){
+      //Serial.println("Dia agregado");
+      diasArray[contDias] = match[i]- '0';
+      contDias++;
+    }
+  }
+}
+
+void handleSave(AsyncWebServerRequest *request){
+  String horas = request->arg("horas");
+  Serial.print("Horas: ");
+  //Serial.println(horas);
+
+  String hora ="";
+
+  for (int i = 0; i < horas.length() ;i++){
+    if (horas.charAt(i) != ','){
+      hora+= horas.charAt(i);
+    } else {
+      Serial.println(hora);
+      horariosFloat[contHorarios] = hora.toFloat();
+      contHorarios++;
+      hora = "";  
+    }
+  }
+  Serial.println(hora);
+  horariosFloat[contHorarios] = hora.toFloat();
+  contHorarios++;
+  hora = "";
+
+  String tiempo = request->arg("tiempo");
+  Serial.print("Minutos: ");
+  //Serial.println(tiempo);
 
 
+  String minutosString = "";
+
+  for (int i = 0; i < tiempo.length(); i++){
+    minutosString += tiempo.charAt(i);
+  }
+
+  minutos = minutosString.toFloat();
+  Serial.println(minutos);
+
+  String dias = request->arg("dias");
+  Serial.print("dias: ");
+  //Serial.println(dias);
+
+  String diasString = "";
+
+  for (int i = 0; i < dias.length() ; i++){
+    diasString += dias.charAt(i);
+
+    if (dias.charAt(i) - '0' >= 0 && dias.charAt(i) - '0' <= 9){
+      diasArray[contDias] = dias.charAt(i)- '0';
+      Serial.print("Dia agregado: ");
+      Serial.println(diasArray[contDias]);
+      contDias++;
+    }
+  }
+
+  request->redirect("/");
+
+}
 
 void pruebaSetup(){
   unsigned long count;
-  char buf [100] =  "14.00,13.44;5;1,4,5";
 
-  
+  char buf [100] =  "horario12.54,14.05,16.04;minuto5;dias1,4,5";
   MatchState ms (buf); // match state object
 
-
-  // // GlobalMatch itera sobre un pattern, llama al callback cada vez que encuentra lo 
-  // // que busca y luego devuelve la cantidad de veces que encontro eso
-  count = ms.GlobalMatch(("(%d%d).(%d%d)"), setHorarios);
-  //                       // "[o%a]"
-  //                       // "^[0-9]{2}.[0-9]{2}"
-  //                       // "(o%a+)( )"
-
-  // char result = ms.Match(("(%d%d).(%d%d)(%p)"),0);
-  // if (result == REGEXP_MATCHED){
-  //   String hola = ms.GetMatch(buf);
-  //   Serial.print("esto devuelve getmatch: ");
-  //   Serial.println(hola);
-  // }
-
-  // show results
-  Serial.print (count );
-  Serial.println(" matches. ");
+  count = ms.GlobalMatch(("horario.*;m"), setHorarios);
+  // Serial.print (count );
+  // Serial.println(" matches. ");
+  int count2 = ms.GlobalMatch(("minuto%d"), setMinutos);
+  int count3 = ms.GlobalMatch(("dias.*$"), setDias);
 }
-
-
-
-
 
 void printDate(DateTime date)
 {
@@ -163,18 +234,14 @@ void setup()
   Serial.begin(9600);
   delay(1000);
 
-  pruebaSetup();
-  for(int i = 0; i< contador ; i++){
-    Serial.print("Horario: ");
-    Serial.println(horariosFloat[i]);
-  }
+  pinMode(rele, OUTPUT);
 
-  if (!rtc.begin())
-  {
+  if (!rtc.begin()){
     Serial.println(F("Couldn't find RTC"));
     while (1);
   }
 
+  //pruebaSetup();
 
   LittleFS.begin();
   WiFi.mode(WIFI_AP);
@@ -187,6 +254,8 @@ void setup()
     request->send(LittleFS, "/index.html",String(), false, processor);
   });
 
+  server.on("/save", HTTP_POST, handleSave);
+
 
     // Route to load style.css file
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -196,12 +265,8 @@ void setup()
   server.begin();
   Serial.println("Servidor inicializado.");
 
-
-
-
   // Si se ha perdido la corriente, fijar fecha y hora
-  if (rtc.lostPower())
-  {
+  if (rtc.lostPower()) {
     // Fijar a fecha y hora de compilacion
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
@@ -215,7 +280,6 @@ void loop()
 {
 
   DateTime now = rtc.now(); // Obtener fecha y hora actual
-  //server.handleClient();
 
   if (!state && enciendeBomba(now)){
     digitalWrite(rele, LOW);
@@ -227,7 +291,7 @@ void loop()
     Serial.print("Desactivado");
   }
 
-  //printDate(now);
+  printDate(now);
 
   delay(3000);
 }
