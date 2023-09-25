@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="style.css">
+	
+	<title>Huerta del manu</title>
+</head>
+<body>
+	<div id="container" class="container">
+		<div id="header" class="encabezado">
+			<h1>La huerta</h1>
+		</div>
+		<div id="main">
+			<!-- <form action="" class=" main"> -->
+				<div class="main">
+					<div id="horarios-div">
+						Horarios
+						<div id="horario-div">
+							<div id="horario">
+								<input type="time" id="time0">
+								<button type="submit" class="botonX" style="visibility:hidden;"></button>
+							</div>
+						</div>
+						<button class="boton btn-plus" id="btn-plus">+</button>
+					</div>
+					<br>
+					<label for="tiempo">Tiempo que debe permanecer encendido el riego (en minutos)</label>
+					<input type="number" name="tiempo" id="minutos" placeholder="5">
+					<br> 
+					Dias
+					<div class="buttons-div">
+						<label>
+						   <input type="checkbox" hidden id="lunes-el"><span>L</span>
+						</label>
+						<label>
+							<input type="checkbox" hidden id="martes-el"><span>M</span>
+						 </label>
+						 <label>
+							<input type="checkbox" hidden id="miercoles-el"><span>X</span>
+						 </label>
+						 <label>
+							<input type="checkbox" hidden id="jueves-el"><span>J</span>
+						 </label>
+						 <label>
+							<input type="checkbox" hidden id="viernes-el"><span>V</span>
+						 </label>
+						 <label>
+							<input type="checkbox" hidden id="sabado-el"><span>S</span>
+						 </label>
+						 <label>
+							<input type="checkbox" hidden id="domingo-el"><span>D</span>
+						 </label>
+						
+					 </div>
+					<br>
+					<button type="submit" value="Submit" id="btn-save" class="boton">Guardar</button>
+				</div>
+			<!-- </form> -->
+			<div id="footer">
+				<p id="lastChange"></p>
+				<button type="submit" value="Submit" id="btn-rele" class="boton">Encender bomba</button>
+				<button type="submit" value="Submit" id="btn-datos" class="boton">Cargar config</button>
+				
+			</div>
+
+		</div>
+	</div>
+	<script src="index.js"></script>
+</body>
+</html>

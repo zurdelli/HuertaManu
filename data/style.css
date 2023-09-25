@@ -1,0 +1,114 @@
+body{
+  background-image: url("./huerta.jpg");
+  background-size: cover;
+  color: #fff;
+  font-family: 'ABeeZee', sans-serif;
+}
+
+.container {
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  border-radius: 10px;
+  display:flex;
+  flex-direction: column;
+}
+
+.encabezado {
+  background: #50514f;
+  color: #fff;
+}
+
+.main{
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 10px;
+}
+
+.main input{
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#horarios-div{
+  display: flex;
+  flex-direction: column;
+}
+
+.boton {
+  background: transparent;
+  /* shadow/sm */
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  border-style: solid;
+  border-color: white;
+  border-radius: 6px;
+  color: white;
+  font-size: 1em;
+  padding: 9px 17px 9px 15px;
+  gap: 12px;
+}
+
+.boton:hover{
+  background: #064E3B;
+  opacity: 1;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+
+.botonX{
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
+  margin-left: 5px;
+  border-radius: 10px;
+}
+
+.btn-plus{
+  margin-top: 5px;
+  padding: 5px;
+}
+
+.buttons-div {
+   margin:4px;
+   background-color:#EFEFEF;
+   border-radius:4px;
+   border:1px solid #D0D0D0;
+   overflow:auto;
+   float:left;
+}
+
+.buttons-div label {
+   float:left;
+   width:4.0em;
+   border-radius: 10px; 
+   
+}
+
+.buttons-div label span {
+   text-align:center;
+   color: black;
+   padding:3px 0px;
+   display:block;
+   
+}
+
+
+.buttons-div input:checked + span {
+   background-color:#064E3B;
+   color:#fff;
+}
+
+.releOn{
+  background: #064E3B;
+}
+
+.releOff{
+  background: red;
+}
